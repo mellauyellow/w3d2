@@ -1,28 +1,10 @@
 require_relative 'questions_database'
 require_relative 'question_follow'
 require_relative 'user'
+require_relative 'modelbase'
 
-class Question
+class Question < ModelBase
   attr_accessor :title, :body, :author
-
-  def self.all
-    data = QuestionDBConnection.instance.execute("SELECT * FROM questions")
-    data.map { |datum| Question.new(datum) }
-  end
-
-  def self.find_by_id(id)
-    question = QuestionDBConnection.instance.execute(<<-SQL, id)
-      SELECT
-        *
-      FROM
-        questions
-      WHERE
-        id = ?
-    SQL
-    return nil unless question.length > 0
-
-    Question.new(question.first)
-  end
 
   def self.find_by_author_id(author)
     questions = QuestionDBConnection.instance.execute(<<-SQL, author)
@@ -72,28 +54,6 @@ class Question
   def num_likes
     QuestionLike.num_likes_for_question_id(@id)
   end
-
-  def save
-    return update if @id
-
-    QuestionDBConnection.instance.execute(<<-SQL, @title, @body, @author)
-      INSERT INTO
-        questions (title, body, author)
-      VALUES
-        (?, ?, ?)
-    SQL
-
-    @id = QuestionDBConnection.instance.last_insert_row_id
-  end
-
-  def update
-    QuestionDBConnection.instance.execute(<<-SQL, @title, @body, @author, @id)
-      UPDATE
-        questions
-      SET
-        title = ?, body = ?, author = ?
-      WHERE
-        id = ?
-    SQL
-  end
 end
+
+# p Question.where({'author' => 2})

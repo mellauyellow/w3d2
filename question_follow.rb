@@ -6,25 +6,6 @@ require 'byebug'
 class QuestionFollow
   attr_accessor :fname, :lname
 
-  def self.all
-    data = QuestionDBConnection.instance.execute("SELECT * FROM question_follows")
-    data.map { |datum| QuestionFollow.new(datum) }
-  end
-
-  def self.find_by_id(id)
-    follow = QuestionDBConnection.instance.execute(<<-SQL, id)
-      SELECT
-        *
-      FROM
-        question_follows
-      WHERE
-        id = ?
-    SQL
-    return nil unless follow.length > 0
-
-    QuestionFollow.new(follow.first)
-  end
-
   def self.followers_for_question_id(question_id)
     followers = QuestionDBConnection.instance.execute(<<-SQL, question_id)
       SELECT
